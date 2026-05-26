@@ -1,0 +1,134 @@
+Create a premium AI writing workspace page for Clario.
+
+Design Style:
+- Minimal luxury SaaS aesthetic
+- Inspired by Grammarly Premium, Notion, Linear, and Apple
+- Warm ivory background
+- Pastel olive green palette
+- Elegant serif + modern sans-serif typography
+- Spacious layout with soft shadows
+- Smooth subtle animations
+
+Page Layout:
+
+TOP NAVBAR
+- Clario logo on left
+- Small subtitle: “Grammar, perfected.”
+- Right side:
+  - History button
+  - User avatar
+  - Sign out button
+
+MAIN WORKSPACE SECTION
+
+LEFT SIDE:
+1. Header section
+- Back button
+- Small badge:
+  “AI-powered grammar”
+
+2. Main headline:
+“Polish your writing in one click.”
+
+3. Subheadline:
+“Paste text, drop a PDF or Word doc, and Clario quietly fixes the grammar — leaving your voice intact.”
+
+4. Toolbar row:
+- Upload PDF/DOCX button
+- Copy text button
+- Character counter aligned right
+
+5. Main text editor
+- Large rounded text area
+- Elegant typography
+- Grammar mistakes visually underlined
+- Smooth typing experience
+- Support long text
+- Auto-scroll
+
+RIGHT SIDE PANEL
+
+1. WRITING SCORES CARD
+Display:
+- Grammar score
+- Fluency score
+- Clarity score
+- Engagement score
+
+Use:
+- animated progress bars
+- modern soft color indicators
+- score out of 100
+
+2. SUGGESTIONS PANEL
+This section is VERY important.
+
+Each suggestion card should contain:
+- Suggestion type badge:
+  Grammar / Fluency / Clarity / Tone
+- Original incorrect sentence
+- Improved corrected sentence
+- Short explanation
+- Accept button
+- Reject button
+
+Example suggestion:
+
+Original:
+“Me and my friend was planning”
+
+Corrected:
+“My friend and I were planning”
+
+Explanation:
+Corrected subject-verb agreement and pronoun order.
+
+Add:
+- smooth expand animation
+- hover effects
+- soft olive accent borders
+
+3. LIVE CORRECTION BEHAVIOR
+When user clicks “Accept”:
+- update text instantly in editor
+- animate correction smoothly
+
+When user clicks “Reject”:
+- dismiss suggestion card
+
+AI UX FEATURES
+
+Add:
+- “Checking grammar...” loading animation
+- Skeleton loaders while AI analyzes text
+- Smooth transitions between states
+
+Empty state:
+“Suggestions will appear here after analysis.”
+
+LOADING EXPERIENCE
+When user clicks:
+“Check Grammar”
+
+Show:
+- animated scanning effect
+- progress indicator
+- subtle shimmer loading UI
+
+ADVANCED UX DETAILS
+- Sticky right sidebar on desktop
+- Mobile responsive stacked layout
+- Soft shadows only
+- Rounded 20px cards
+- Elegant whitespace
+- No harsh gradients
+- No neon colors
+
+OPTIONAL PREMIUM TOUCHES
+- Add live word count
+- Reading time estimate
+- Auto-save drafts
+- Recent corrections history
+- AI confidence indicator
+
+The workspace should feel like a polished premium AI writing product built by a modern startup — calm, intelligent, elegant, and highly usable.

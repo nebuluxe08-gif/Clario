@@ -1,0 +1,101 @@
+Create a premium modern SaaS landing page for “Clario”, an AI-powered grammar and writing assistant.
+
+The design aesthetic should feel:
+- elegant
+- editorial
+- minimal
+- luxurious but calm
+- inspired by Notion, Grammarly Premium, Linear, and Apple-style spacing
+
+Use a sophisticated pastel olive green palette with warm ivory backgrounds and subtle muted accents.
+
+Typography:
+- Elegant serif headlines for hero sections
+- Clean modern sans-serif for body text
+- High contrast typography hierarchy
+- Spacious layout with premium whitespace
+
+Landing page structure:
+
+1. Sticky Minimal Navbar
+- Clario logo on left
+- Navigation links: Features, Pricing, About
+- Rounded user profile button/avatar on right
+- Thin elegant divider line under navbar
+
+2. Hero Section
+Headline:
+“Write with clarity & grace.”
+
+Subheadline:
+“Clario elevates your writing across PDFs, documents, emails, and pasted text — with AI-powered grammar, fluency, clarity, and engagement scoring.”
+
+CTA buttons:
+- Start for free
+- See it in action
+
+Add subtle fade-in animations and smooth hover transitions.
+
+3. Supported Formats Section
+Minimal horizontal feature row:
+- PDF Documents
+- Word / Docs
+- Gmail
+- Pasted Text
+- Web Pages
+
+Use tiny olive green indicators/icons.
+
+4. Writing Score Section
+Headline:
+“Four dimensions, one perfect score.”
+
+Display elegant score cards for:
+- Grammar
+- Fluency
+- Clarity
+- Engagement
+
+Use circular progress visuals with soft modern styling.
+
+5. Features Grid
+Create premium feature cards with rounded corners and subtle shadows.
+
+Features:
+- PDF Analysis
+- Document Support
+- Gmail Integration
+- Paste & Correct
+- Browser Extension
+- Progress Tracking
+
+Keep card design minimalist and spacious.
+
+6. Testimonial Section
+Elegant centered quote from a writer or professional user.
+
+7. Footer
+Include:
+© 2026 Clario. All rights reserved.
+
+Add:
+- Privacy Policy
+- Terms
+- Contact
+
+Design Requirements:
+- Mobile responsive
+- Smooth scrolling
+- Soft shadows
+- Rounded UI elements
+- Calm premium aesthetic
+- Avoid overly flashy gradients
+- No neon colors
+- No cartoonish illustrations
+
+Animation Style:
+- smooth fade-up transitions
+- gentle hover interactions
+- subtle motion only
+
+The overall experience should feel like a polished premium startup product, not an AI-generated template.
