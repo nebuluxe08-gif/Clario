@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface ProfileUpdate {
+  name?: string;
+  email?: string;
+  bio?: string;
+  avatarUrl?: string;
 }

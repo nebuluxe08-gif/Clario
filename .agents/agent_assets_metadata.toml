@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "X9kbwye-a40RT4u1CtGZT"
+uri = "file://artifacts/clario/src/assets/hero-studio.png"
+type = "image"
+title = "Calm writers studio natural light"
