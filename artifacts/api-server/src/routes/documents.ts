@@ -11,13 +11,17 @@ import {
 
 const router: IRouter = Router();
 
+function serializeDoc(doc: { createdAt: Date | string; [key: string]: unknown }) {
+  return { ...doc, createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt };
+}
+
 router.get("/documents", async (req, res): Promise<void> => {
   const docs = await db
     .select()
     .from(documentsTable)
     .orderBy(desc(documentsTable.createdAt));
 
-  res.json(ListDocumentsResponse.parse(docs));
+  res.json(ListDocumentsResponse.parse(docs.map(serializeDoc)));
 });
 
 router.post("/documents", async (req, res): Promise<void> => {
@@ -43,7 +47,7 @@ router.post("/documents", async (req, res): Promise<void> => {
     })
     .returning();
 
-  res.status(201).json(GetDocumentResponse.parse(doc));
+  res.status(201).json(GetDocumentResponse.parse(serializeDoc(doc)));
 });
 
 router.get("/documents/:id", async (req, res): Promise<void> => {
@@ -64,7 +68,7 @@ router.get("/documents/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  res.json(GetDocumentResponse.parse(doc));
+  res.json(GetDocumentResponse.parse(serializeDoc(doc)));
 });
 
 router.delete("/documents/:id", async (req, res): Promise<void> => {

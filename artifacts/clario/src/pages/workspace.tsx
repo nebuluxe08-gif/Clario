@@ -30,6 +30,9 @@ export function Workspace() {
   const [activeCorrection, setActiveCorrection] = useState<{corr: Correction, index: number, x: number, y: number} | null>(null);
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(true);
   const [showAuthGate, setShowAuthGate] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const { isSignedIn } = useUser();
   const { toast } = useToast();
@@ -135,13 +138,58 @@ export function Workspace() {
     setActiveCorrection(null);
   };
 
+  const extractFileText = async (file: File) => {
+    const allowed = [".pdf", ".doc", ".docx"];
+    const ext = file.name.toLowerCase();
+    if (!allowed.some((a) => ext.endsWith(a))) {
+      toast({ title: "Unsupported file", description: "Please upload a PDF, DOC, or DOCX file.", variant: "destructive" });
+      return;
+    }
+
+    setIsExtracting(true);
+    setUploadedFileName(null);
+    setAnalysis(null);
+    setText("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/extract-text", { method: "POST", body: formData });
+      const data = await res.json() as { text?: string; error?: string; filename?: string; wordCount?: number };
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Extraction failed");
+      }
+
+      setText(data.text ?? "");
+      setUploadedFileName(data.filename ?? file.name);
+      toast({
+        title: "Text extracted",
+        description: `${data.wordCount?.toLocaleString() ?? "?"} words from "${data.filename}"`,
+      });
+    } catch (err) {
+      toast({
+        title: "Extraction failed",
+        description: err instanceof Error ? err.message : "Could not read the file. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setText(`Extracted text from ${file.name}...\n\nThe quick brown fox jumps over the lazy dog. Its a good day to write something beautifully.`);
-      toast({ title: "File loaded", description: `Successfully extracted text from ${file.name}` });
-      setAnalysis(null);
-    }
+    if (file) extractFileText(file);
+    e.target.value = "";
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) extractFileText(file);
   };
 
   const handleAcceptCorrection = (corr: Correction, idx: number) => {
@@ -313,14 +361,65 @@ export function Workspace() {
 
         <div className="flex-1 flex flex-col overflow-hidden px-6 pb-6 relative">
           {activeTab !== 'text' && !text && !analysis && (
-            <div className="mb-4 rounded-2xl border-2 border-dashed border-border/60 bg-muted/20 p-12 text-center transition-colors hover:bg-muted/30">
-              <Upload size={32} className="mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-medium text-foreground mb-1">Upload a document</h3>
-              <p className="text-sm text-muted-foreground mb-6 font-light">Drop a PDF or DOCX file to extract text for analysis.</p>
-              <input type="file" id="file-upload" className="hidden" onChange={handleFileUpload} />
-              <Button variant="outline" onClick={() => document.getElementById('file-upload')?.click()} className="rounded-full px-6">
-                Choose File
-              </Button>
+            <div
+              className={`mb-4 rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-200 cursor-pointer ${
+                isDragging
+                  ? "border-primary bg-primary/8 scale-[1.01]"
+                  : isExtracting
+                  ? "border-primary/40 bg-primary/5"
+                  : "border-border/60 bg-muted/20 hover:bg-muted/30 hover:border-border"
+              }`}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              onClick={() => !isExtracting && document.getElementById('file-upload')?.click()}
+            >
+              {isExtracting ? (
+                <>
+                  <Loader2 size={32} className="mx-auto text-primary mb-4 animate-spin" />
+                  <h3 className="font-medium text-foreground mb-1">Extracting text…</h3>
+                  <p className="text-sm text-muted-foreground font-light">Reading your document, please wait.</p>
+                </>
+              ) : isDragging ? (
+                <>
+                  <Upload size={32} className="mx-auto text-primary mb-4" />
+                  <h3 className="font-medium text-primary mb-1">Drop to upload</h3>
+                  <p className="text-sm text-muted-foreground font-light">Release to extract text</p>
+                </>
+              ) : (
+                <>
+                  <div className="w-14 h-14 rounded-2xl bg-muted border border-border/60 flex items-center justify-center mx-auto mb-4">
+                    <FileText size={26} className="text-muted-foreground" />
+                  </div>
+                  <h3 className="font-medium text-foreground mb-1">Upload a document</h3>
+                  <p className="text-sm text-muted-foreground mb-5 font-light">
+                    Drop a <span className="font-medium text-foreground">PDF</span> or <span className="font-medium text-foreground">DOCX</span> file here, or click to browse.
+                  </p>
+                  <p className="text-xs text-muted-foreground/70">Supports PDF, DOC, DOCX · Max 20 MB</p>
+                </>
+              )}
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleFileUpload}
+              />
+            </div>
+          )}
+
+          {/* Uploaded file badge — shown when text is loaded from a file */}
+          {activeTab === 'pdf' && uploadedFileName && (text || analysis) && (
+            <div className="mb-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/8 border border-primary/20 text-sm w-fit">
+              <FileText size={14} className="text-primary shrink-0" />
+              <span className="text-foreground font-medium truncate max-w-xs">{uploadedFileName}</span>
+              <button
+                className="ml-1 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => { setText(""); setAnalysis(null); setUploadedFileName(null); }}
+                title="Remove file"
+              >
+                <X size={13} />
+              </button>
             </div>
           )}
 

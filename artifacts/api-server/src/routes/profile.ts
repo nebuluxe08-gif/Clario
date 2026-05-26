@@ -28,9 +28,13 @@ async function ensureProfile() {
 
 const router: IRouter = Router();
 
+function serializeProfile(profile: { id: number; name: string; email: string; avatarUrl?: string | null; bio?: string | null; createdAt: Date | string }) {
+  return { ...profile, createdAt: profile.createdAt instanceof Date ? profile.createdAt.toISOString() : profile.createdAt };
+}
+
 router.get("/profile", async (req, res): Promise<void> => {
   const profile = await ensureProfile();
-  res.json(GetProfileResponse.parse(profile));
+  res.json(GetProfileResponse.parse(serializeProfile(profile)));
 });
 
 router.patch("/profile", async (req, res): Promise<void> => {
@@ -48,7 +52,7 @@ router.patch("/profile", async (req, res): Promise<void> => {
     .where(eq(profilesTable.id, DEFAULT_PROFILE_ID))
     .returning();
 
-  res.json(UpdateProfileResponse.parse(updated));
+  res.json(UpdateProfileResponse.parse(serializeProfile(updated)));
 });
 
 router.get("/stats", async (req, res): Promise<void> => {
