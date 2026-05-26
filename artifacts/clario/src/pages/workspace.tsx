@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "wouter";
+import { useUser } from "@clerk/react";
 import { 
   useAnalyzeText, 
   useCreateDocument, 
@@ -12,12 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { 
   FileText, Upload, Mail, Loader2, Play, CheckCircle2, 
-  AlertCircle, Save, Edit3, X, Copy, ChevronDown, ChevronUp
+  AlertCircle, Save, X, Copy, ChevronDown, ChevronUp, CheckCheck
 } from "lucide-react";
-import type { AnalysisResult, Document, Correction } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { AnalysisResult, Document, Correction } from "@workspace/api-client-react";
+
+const FREE_USE_KEY = "clario_free_use_consumed";
 
 export function Workspace() {
   const [text, setText] = useState("");
@@ -26,7 +29,9 @@ export function Workspace() {
   const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
   const [activeCorrection, setActiveCorrection] = useState<{corr: Correction, index: number, x: number, y: number} | null>(null);
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(true);
-  
+  const [showAuthGate, setShowAuthGate] = useState(false);
+
+  const { isSignedIn } = useUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -52,6 +57,15 @@ export function Workspace() {
       toast({ title: "Empty text", description: "Please enter some text to analyze", variant: "destructive" });
       return;
     }
+
+    // Free-use gate: non-signed-in users get one free analysis
+    if (!isSignedIn) {
+      const consumed = localStorage.getItem(FREE_USE_KEY);
+      if (consumed) {
+        setShowAuthGate(true);
+        return;
+      }
+    }
     
     analyzeMutation.mutate({
       data: { text, sourceType: activeTab as any }
@@ -60,11 +74,27 @@ export function Workspace() {
         setAnalysis(result);
         setSelectedDocId(null);
         setActiveCorrection(null);
+        // Mark free use as consumed for non-signed-in users
+        if (!isSignedIn) {
+          localStorage.setItem(FREE_USE_KEY, "1");
+        }
       },
       onError: () => {
         toast({ title: "Analysis failed", description: "An error occurred while analyzing the text", variant: "destructive" });
       }
     });
+  };
+
+  const handleAcceptAll = () => {
+    if (!analysis || analysis.corrections.length === 0) return;
+    let newText = text;
+    for (const corr of analysis.corrections) {
+      newText = newText.replace(corr.original, corr.corrected);
+    }
+    setText(newText);
+    setAnalysis({ ...analysis, corrections: [] });
+    setActiveCorrection(null);
+    toast({ title: "All suggestions accepted", description: "Your text has been fully corrected." });
   };
 
   const handleSave = () => {
@@ -381,11 +411,25 @@ export function Workspace() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Suggestions</h3>
-                {analysis && analysis.corrections.length > 0 && (
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">
-                    {analysis.corrections.length}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {analysis && analysis.corrections.length > 0 && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs rounded-full px-3 border-primary/30 text-primary hover:bg-primary/10"
+                        onClick={handleAcceptAll}
+                        data-testid="button-accept-all"
+                      >
+                        <CheckCheck size={12} className="mr-1.5" />
+                        Accept all
+                      </Button>
+                      <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">
+                        {analysis.corrections.length}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
 
               {analyzeMutation.isPending ? (
@@ -402,7 +446,7 @@ export function Workspace() {
                 analysis.corrections.length > 0 ? (
                   <div className="space-y-3">
                     <AnimatePresence>
-                      {analysis.corrections.map((corr, idx) => (
+                      {analysis.corrections.map((corr: Correction, idx: number) => (
                         <motion.div 
                           key={idx}
                           initial={{ opacity: 0, height: 0 }}
@@ -490,6 +534,53 @@ export function Workspace() {
           </div>
         </ScrollArea>
       </div>
+
+      {/* Auth Gate Modal */}
+      <AnimatePresence>
+        {showAuthGate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center px-4"
+            onClick={() => setShowAuthGate(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-card border border-border rounded-2xl p-8 shadow-2xl max-w-md w-full text-center"
+            >
+              <div className="w-14 h-14 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center mx-auto mb-5">
+                <CheckCheck size={24} className="text-primary" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold mb-2">You've used your free analysis</h2>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                Create a free account to continue using Clario — unlimited analyses, document history, and your full writing profile.
+              </p>
+              <div className="flex flex-col gap-3">
+                <Link href="/sign-up" onClick={() => setShowAuthGate(false)}>
+                  <Button className="w-full rounded-full" size="lg" data-testid="button-gate-signup">
+                    Create free account
+                  </Button>
+                </Link>
+                <Link href="/sign-in" onClick={() => setShowAuthGate(false)}>
+                  <Button variant="outline" className="w-full rounded-full" size="lg" data-testid="button-gate-signin">
+                    Sign in to existing account
+                  </Button>
+                </Link>
+              </div>
+              <button
+                onClick={() => setShowAuthGate(false)}
+                className="mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Maybe later
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Inline Correction Popup */}
       <AnimatePresence>

@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Outfit:wght@300..700&display=swap');
+@layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
 @import "tw-animate-css";
+@import '@clerk/themes/shadcn.css';
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
@@ -68,89 +70,101 @@
 }
 
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(0,0,0, .08);
+  --badge-outline: rgba(0,0,0, .04);
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(0,0,0, .02);
+  --elevate-2: rgba(0,0,0, .06);
 
-  /* Warm studio off-white background #f8f6f2 */
-  --background: 40 23% 96%;
-  /* Deep charcoal foreground #1a1918 */
-  --foreground: 30 4% 10%;
+  /* Soft pastel olive ivory background */
+  --background: 82 22% 95%;
+  /* Deep sage-charcoal foreground */
+  --foreground: 80 8% 14%;
 
-  /* Soft borders */
-  --border: 40 10% 88%;
-  --input: 40 10% 88%;
-  --ring: 14 66% 53%;
+  /* Olive-tinted borders */
+  --border: 80 18% 84%;
+  --input: 80 18% 84%;
+  --ring: 80 36% 42%;
 
-  --card: 40 23% 98%;
-  --card-foreground: 30 4% 10%;
-  --card-border: 40 10% 90%;
+  --card: 78 20% 97%;
+  --card-foreground: 80 8% 14%;
+  --card-border: 80 18% 88%;
 
-  --popover: 40 23% 98%;
-  --popover-foreground: 30 4% 10%;
-  --popover-border: 40 10% 88%;
+  --popover: 78 20% 97%;
+  --popover-foreground: 80 8% 14%;
+  --popover-border: 80 18% 84%;
 
-  /* Vibrant amber/burnt orange accent #d95c35 */
-  --primary: 14 66% 53%;
+  /* Pastel olive green primary */
+  --primary: 80 36% 42%;
   --primary-foreground: 0 0% 100%;
 
-  /* Subtle warm grey */
-  --secondary: 40 15% 90%;
-  --secondary-foreground: 30 4% 10%;
+  /* Soft olive secondary */
+  --secondary: 80 18% 88%;
+  --secondary-foreground: 80 8% 18%;
 
-  --muted: 40 15% 90%;
-  --muted-foreground: 30 4% 40%;
+  --muted: 80 16% 90%;
+  --muted-foreground: 80 8% 44%;
 
-  --accent: 14 66% 53%;
+  --accent: 80 36% 42%;
   --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 72% 56%;
   --destructive-foreground: 0 0% 100%;
 
-  --chart-1: 14 66% 53%;
-  --chart-2: 210 50% 50%;
-  --chart-3: 150 40% 50%;
-  --chart-4: 300 40% 50%;
-  --chart-5: 45 80% 50%;
-  --olive: 72 20% 52%;
+  /* Chart colors — keep differentiated for scoring */
+  --chart-1: 150 44% 44%;
+  --chart-2: 40 72% 52%;
+  --chart-3: 210 56% 52%;
+  --chart-4: 280 44% 54%;
+  --chart-5: 80 36% 42%;
+
+  --sidebar: 82 20% 93%;
+  --sidebar-foreground: 80 8% 14%;
+  --sidebar-border: 80 18% 84%;
+  --sidebar-primary: 80 36% 42%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 80 18% 88%;
+  --sidebar-accent-foreground: 80 8% 18%;
+  --sidebar-ring: 80 36% 42%;
+
+  /* Olive accent variable */
+  --olive: 80 36% 42%;
 
   --app-font-sans: 'Outfit', sans-serif;
   --app-font-serif: 'Fraunces', serif;
   --app-font-mono: 'Space Mono', monospace;
-  
-  --radius: 0.5rem;
+
+  --radius: 0.625rem;
 }
 
 .dark {
-  --background: 30 4% 10%;
-  --foreground: 40 23% 96%;
-  --border: 30 4% 20%;
-  --input: 30 4% 20%;
-  --ring: 14 66% 53%;
-  
-  --card: 30 4% 12%;
-  --card-foreground: 40 23% 96%;
-  --card-border: 30 4% 20%;
-  
-  --popover: 30 4% 12%;
-  --popover-foreground: 40 23% 96%;
-  --popover-border: 30 4% 20%;
-  
-  --primary: 14 66% 53%;
+  --background: 80 8% 11%;
+  --foreground: 82 18% 92%;
+  --border: 80 8% 22%;
+  --input: 80 8% 22%;
+  --ring: 80 36% 52%;
+
+  --card: 80 8% 13%;
+  --card-foreground: 82 18% 92%;
+  --card-border: 80 8% 22%;
+
+  --popover: 80 8% 13%;
+  --popover-foreground: 82 18% 92%;
+  --popover-border: 80 8% 22%;
+
+  --primary: 80 36% 52%;
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 30 4% 20%;
-  --secondary-foreground: 40 23% 96%;
-  
-  --muted: 30 4% 20%;
-  --muted-foreground: 40 15% 70%;
-  
-  --accent: 14 66% 53%;
+
+  --secondary: 80 8% 20%;
+  --secondary-foreground: 82 18% 92%;
+
+  --muted: 80 8% 20%;
+  --muted-foreground: 80 12% 62%;
+
+  --accent: 80 36% 52%;
   --accent-foreground: 0 0% 100%;
-  
-  --destructive: 0 84% 60%;
+
+  --destructive: 0 72% 56%;
   --destructive-foreground: 0 0% 100%;
 }
 
@@ -164,4 +178,10 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif tracking-tight;
   }
+}
+
+/* Clerk pseudo-state overrides (must be outside @layer) */
+.cl-formFieldInput::placeholder {
+  color: hsl(80 8% 58%);
+  opacity: 1;
 }
