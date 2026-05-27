@@ -49,42 +49,6 @@ export function Home() {
                 </Link>
               </motion.div>
             </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
-              className="relative lg:ml-auto w-full max-w-md"
-            >
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-border/40 aspect-[4/5] bg-card flex items-center justify-center">
-                {/* Floating UI element */}
-                <motion.div 
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6, duration: 0.6 }}
-                  className="absolute bottom-6 left-6 right-6 bg-background/80 backdrop-blur-xl border border-white/10 p-5 rounded-2xl shadow-xl"
-                >
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider mb-1">Grammar</span>
-                      <span className="text-lg font-serif text-emerald-500">97</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider mb-1">Fluency</span>
-                      <span className="text-lg font-serif text-amber-500">91</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider mb-1">Clarity</span>
-                      <span className="text-lg font-serif text-blue-500">98</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider mb-1">Engagement</span>
-                      <span className="text-lg font-serif text-purple-500">88</span>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
