@@ -56,10 +56,7 @@ export function Home() {
               transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
               className="relative lg:ml-auto w-full max-w-md"
             >
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-border/40 aspect-[4/5] bg-card flex items-center justify-center group">
-                <img src="/src/assets/hero-studio.png" alt="Writer's studio" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent mix-blend-overlay"></div>
-                
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-border/40 aspect-[4/5] bg-card flex items-center justify-center">
                 {/* Floating UI element */}
                 <motion.div 
                   initial={{ y: 20, opacity: 0 }}
