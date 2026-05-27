@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq, desc, avg } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
+import { getAuth } from "@clerk/express";
 import { db, documentsTable } from "@workspace/db";
 import {
   CreateDocumentBody,
@@ -16,15 +17,20 @@ function serializeDoc(doc: { createdAt: Date | string; [key: string]: unknown })
 }
 
 router.get("/documents", async (req, res): Promise<void> => {
+  const { userId } = getAuth(req);
+  const whereClause = userId ? eq(documentsTable.clerkId, userId) : undefined;
+
   const docs = await db
     .select()
     .from(documentsTable)
+    .where(whereClause)
     .orderBy(desc(documentsTable.createdAt));
 
   res.json(ListDocumentsResponse.parse(docs.map(serializeDoc)));
 });
 
 router.post("/documents", async (req, res): Promise<void> => {
+  const { userId } = getAuth(req);
   const parsed = CreateDocumentBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -34,6 +40,7 @@ router.post("/documents", async (req, res): Promise<void> => {
   const [doc] = await db
     .insert(documentsTable)
     .values({
+      clerkId: userId ?? null,
       title: parsed.data.title,
       originalText: parsed.data.originalText,
       correctedText: parsed.data.correctedText,
@@ -51,6 +58,7 @@ router.post("/documents", async (req, res): Promise<void> => {
 });
 
 router.get("/documents/:id", async (req, res): Promise<void> => {
+  const { userId } = getAuth(req);
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = GetDocumentParams.safeParse({ id: parseInt(raw, 10) });
   if (!params.success) {
@@ -58,10 +66,11 @@ router.get("/documents/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [doc] = await db
-    .select()
-    .from(documentsTable)
-    .where(eq(documentsTable.id, params.data.id));
+  const whereClause = userId
+    ? and(eq(documentsTable.id, params.data.id), eq(documentsTable.clerkId, userId))
+    : eq(documentsTable.id, params.data.id);
+
+  const [doc] = await db.select().from(documentsTable).where(whereClause);
 
   if (!doc) {
     res.status(404).json({ error: "Document not found" });
@@ -72,6 +81,7 @@ router.get("/documents/:id", async (req, res): Promise<void> => {
 });
 
 router.delete("/documents/:id", async (req, res): Promise<void> => {
+  const { userId } = getAuth(req);
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = DeleteDocumentParams.safeParse({ id: parseInt(raw, 10) });
   if (!params.success) {
@@ -79,10 +89,11 @@ router.delete("/documents/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [doc] = await db
-    .delete(documentsTable)
-    .where(eq(documentsTable.id, params.data.id))
-    .returning();
+  const whereClause = userId
+    ? and(eq(documentsTable.id, params.data.id), eq(documentsTable.clerkId, userId))
+    : eq(documentsTable.id, params.data.id);
+
+  const [doc] = await db.delete(documentsTable).where(whereClause).returning();
 
   if (!doc) {
     res.status(404).json({ error: "Document not found" });

@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import multer, { type FileFilterCallback } from "multer";
 import mammoth from "mammoth";
-import { execFile } from "node:child_process";
+import { execFile, execSync } from "node:child_process";
 import { writeFile, unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,6 +9,14 @@ import { randomUUID } from "node:crypto";
 import type { Request } from "express";
 
 const router: IRouter = Router();
+
+const PDFTOTEXT_BIN = (() => {
+  try {
+    return execSync("which pdftotext", { encoding: "utf8" }).trim();
+  } catch {
+    return "pdftotext";
+  }
+})();
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -18,8 +26,8 @@ const upload = multer({
     file: Express.Multer.File,
     cb: FileFilterCallback,
   ) => {
-    const ext = file.originalname.toLowerCase();
-    if (ext.endsWith(".pdf") || ext.endsWith(".doc") || ext.endsWith(".docx")) {
+    const name = file.originalname.toLowerCase();
+    if (name.endsWith(".pdf") || name.endsWith(".doc") || name.endsWith(".docx")) {
       cb(null, true);
     } else {
       cb(new Error("Unsupported file type. Only PDF, DOC, and DOCX files are accepted."));
@@ -30,7 +38,7 @@ const upload = multer({
 function runPdfToText(pdfPath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(
-      "pdftotext",
+      PDFTOTEXT_BIN,
       ["-enc", "UTF-8", "-layout", pdfPath, "-"],
       { maxBuffer: 50 * 1024 * 1024 },
       (err, stdout, stderr) => {
@@ -57,7 +65,7 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
 router.post("/extract-text", upload.single("file"), async (req, res): Promise<void> => {
   const file = req.file;
   if (!file) {
-    res.status(400).json({ error: "No file uploaded" });
+    res.status(400).json({ error: "No file uploaded. Please attach a PDF or DOCX file." });
     return;
   }
 
@@ -90,7 +98,7 @@ router.post("/extract-text", upload.single("file"), async (req, res): Promise<vo
 
     if (!cleaned) {
       res.status(422).json({
-        error: "No text could be extracted. The file may be image-only, scanned, or password-protected.",
+        error: "No readable text found. The file may be a scanned image, password-protected, or contain only graphics.",
       });
       return;
     }
@@ -103,7 +111,7 @@ router.post("/extract-text", upload.single("file"), async (req, res): Promise<vo
     });
   } catch (err) {
     req.log.error({ err }, "Failed to extract text from file");
-    res.status(500).json({ error: "Failed to extract text from the uploaded file." });
+    res.status(500).json({ error: "Failed to extract text from the uploaded file. Please try a different file." });
   }
 });
 

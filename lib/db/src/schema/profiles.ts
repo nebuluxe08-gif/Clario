@@ -4,8 +4,9 @@ import { z } from "zod/v4";
 
 export const profilesTable = pgTable("profiles", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull().default("Clario User"),
-  email: text("email").notNull().default("user@clario.app"),
+  clerkId: text("clerk_id").unique(),
+  name: text("name").notNull().default(""),
+  email: text("email").notNull().default(""),
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
