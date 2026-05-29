@@ -1,9 +1,13 @@
-import { Router, type IRouter } from "express";
+import express, { Router, type IRouter } from "express";
 import multer, { type FileFilterCallback } from "multer";
 import mammoth from "mammoth";
 import type { Request } from "express";
 // @ts-ignore
 import PDFParser from "pdf2json";
+
+// 1. Initialize the main Express application
+const app = express();
+app.use(express.json());
 
 const router: IRouter = Router();
 
@@ -105,6 +109,15 @@ router.post("/extract-text", upload.single("file"), async (req, res): Promise<vo
     }
     res.status(500).json({ error: "Failed to extract text from the uploaded file. Please try a different file." });
   }
+});
+
+// 2. Attach your router to the app
+app.use("/", router);
+
+// 3. Keep the process alive by listening to the dynamic port assigned by Render
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is officially live and listening on port ${PORT}`);
 });
 
 export default router;
