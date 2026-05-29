@@ -1,22 +1,10 @@
 import { Router, type IRouter } from "express";
 import multer, { type FileFilterCallback } from "multer";
 import mammoth from "mammoth";
-import { execFile, execSync } from "node:child_process";
-import { writeFile, unlink } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { randomUUID } from "node:crypto";
 import type { Request } from "express";
+import pdfParse from "pdf-parse"; 
 
 const router: IRouter = Router();
-
-const PDFTOTEXT_BIN = (() => {
-  try {
-    return execSync("which pdftotext", { encoding: "utf8" }).trim();
-  } catch {
-    return "pdftotext";
-  }
-})();
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -35,30 +23,13 @@ const upload = multer({
   },
 });
 
-function runPdfToText(pdfPath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile(
-      PDFTOTEXT_BIN,
-      ["-enc", "UTF-8", "-layout", pdfPath, "-"],
-      { maxBuffer: 50 * 1024 * 1024 },
-      (err, stdout, stderr) => {
-        if (err) {
-          reject(new Error(stderr || err.message));
-        } else {
-          resolve(stdout);
-        }
-      },
-    );
-  });
-}
-
+// New streamlined, server-safe PDF extraction function
 async function extractPdfText(buffer: Buffer): Promise<string> {
-  const tmpPath = join(tmpdir(), `clario_${randomUUID()}.pdf`);
   try {
-    await writeFile(tmpPath, buffer);
-    return await runPdfToText(tmpPath);
-  } finally {
-    await unlink(tmpPath).catch(() => {/* ignore cleanup errors */});
+    const data = await pdfParse(buffer);
+    return data.text || "";
+  } catch (error) {
+    throw new Error("Failed to parse PDF data layer directly.");
   }
 }
 
@@ -110,7 +81,12 @@ router.post("/extract-text", upload.single("file"), async (req, res): Promise<vo
       wordCount: cleaned.split(/\s+/).filter(Boolean).length,
     });
   } catch (err) {
-    req.log.error({ err }, "Failed to extract text from file");
+    // Graceful fallback logger check
+    if (req.log && typeof req.log.error === "function") {
+      req.log.error({ err }, "Failed to extract text from file");
+    } else {
+      console.error("Failed to extract text from file", err);
+    }
     res.status(500).json({ error: "Failed to extract text from the uploaded file. Please try a different file." });
   }
 });
